@@ -1,8 +1,6 @@
 """
 TODO
-    plotting...heatmap  plot_2d...
-    some savefig capability
-    Add sample code to run functions
+    Add sample code to run functions (savefig)
 """
 
 from numpy import *
@@ -818,10 +816,10 @@ def bV(start=1e-8, end=1e-5, mode=0, iterations=200, solver=solve_default, max_s
 
     RETURNS
     -------
-    b : list of numbers
-        list of b values
     V : list of numbers
         list of V values
+    b : list of numbers
+        list of b values
 
     NOTES
     -----
@@ -840,7 +838,7 @@ def bV(start=1e-8, end=1e-5, mode=0, iterations=200, solver=solve_default, max_s
     V = [k_lamb(l) * w * sqrt(nf**2 - ns**2) for l in lamb_lst]
     N_lst = [N(beta_lst[i], lamb_lst[i]) for i in range(len(lamb_lst))]
     b = [(N_lst[i]**2 - ns**2) / (nf**2 - ns**2) for i in range(len(lamb_lst))]
-    return b, V
+    return V, b
 
 def bV_2d_lamb(start=1e-8, end=1e-5, mode=0, mode_2=0, iterations=200, solver=solve_2d_default, max_solver_iter=default_iter):
     """Generates values to plot the bV curve
@@ -862,10 +860,10 @@ def bV_2d_lamb(start=1e-8, end=1e-5, mode=0, mode_2=0, iterations=200, solver=so
 
     RETURNS
     -------
-    b : list of numbers
-        list of b values
     V : list of numbers
         list of V values
+    b : list of numbers
+        list of b values
 
     NOTES
     -----
@@ -884,8 +882,7 @@ def bV_2d_lamb(start=1e-8, end=1e-5, mode=0, mode_2=0, iterations=200, solver=so
     V = [k_lamb(l) * w * sqrt(nf**2 - ns**2) for l in lamb_lst]
     N_lst = [N(beta_lst[i], lamb_lst[i]) for i in range(len(lamb_lst))]
     b = [(N_lst[i]**2 - ns**2) / (nf**2 - ns**2) for i in range(len(lamb_lst))]
-    return b, V
-
+    return V, b
 
 def ey_default(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_iter, divisions=plot_divisions, correct_2d=False):
     """Generates values to plot the ey curve along the x-axis given as e_y(x)
@@ -908,7 +905,7 @@ def ey_default(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_iter
     RETURNS
     -------
     x_vals : list of numbers
-        list of y values
+        list of x values
     field_vals : list of numbers
         list of e_y(x) computations
     beta : number
@@ -922,6 +919,7 @@ def ey_default(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_iter
         - substrate (left)
         - film (middle)
         - cover (right)
+    • List of x_vals returned are in terms of the width
 
     """
     start_margin=-margin
@@ -953,7 +951,7 @@ def ey_default(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_iter
     N = beta / k
     b = (N**2 - ns**2) / (nf**2 - ns**2)
 
-    # -h / 2 center
+    # -w / 2 center
     start = start_margin - 0.5
     end = end_margin - 0.5
     x_vals = make_range(start, end, divisions)
@@ -1011,10 +1009,10 @@ def ey_default_alt(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_
 
     RETURNS
     -------
-    x_vals : list of numbers
-        list of x values
+    y_vals : list of numbers
+        list of y values
     field_vals : list of numbers
-        list of e_y(x) computations
+        list of e_y(y) computations
     beta : number
         the beta value of the waveguide for a given mode
 
@@ -1026,6 +1024,7 @@ def ey_default_alt(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_
         - substrate (bottom)
         - film (middle)
         - cover (top)
+    • List of y_vals returned are in terms of h
 
     """
     start_margin=-margin
@@ -1095,7 +1094,7 @@ def ey_default_alt(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_
         
     return y_vals, field_vals, beta
 
-def plot_ey_default(lamb=wavelength, mode=0, margin=1.5, peak_normalize=False, true_normalize=False, center=False, max_solver_iter=default_iter, divisions=plot_divisions):
+def plot_ey_default(lamb=wavelength, mode=0, margin=1.5, peak_normalize=False, true_normalize=False, center=False, max_solver_iter=default_iter, divisions=plot_divisions, target_file=None, no_output=False):
     """Evaluates the ey values along the x-axis and plots them
 
     PARAMETERS
@@ -1116,6 +1115,9 @@ def plot_ey_default(lamb=wavelength, mode=0, margin=1.5, peak_normalize=False, t
         max number of iterations to run the solver
     divisions : number
         number of points to evaluate
+    target_file : string
+        target file to save plot to
+        if no target file is provided, it does not save the plot to a file and simply returns points to plot
 
     RETURNS
     -------
@@ -1135,6 +1137,7 @@ def plot_ey_default(lamb=wavelength, mode=0, margin=1.5, peak_normalize=False, t
         - substrate (left)
         - film (middle)
         - cover (right)
+    • List of x_vals returned are in terms of w
 
     """
     res = ey_default(lamb=lamb, mode=mode, margin=margin)
@@ -1170,8 +1173,10 @@ def plot_ey_default(lamb=wavelength, mode=0, margin=1.5, peak_normalize=False, t
         
     plt.plot(x_vals, field_vals)
 
-    return x_vals, field_vals, beta
+    if target_file != None and type(target_file) == str:
+        savefig(target_file)
 
+    return x_vals, field_vals, beta
 
 def ey_2d_eff(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10, max_solver_iter=default_iter, divisions=plot_divisions):
     """Evaluates the ey values along both the x and y axes and plots them
@@ -1212,6 +1217,7 @@ def ey_2d_eff(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10, max_s
     • If no Beta can be evaluated for this mode, it returns None
     • Assumes a strip waveguide
     • Uses the effective index method
+    • List of x_vals, y_vals returned are in terms of w, h
 
     """
     c_light = 3e8
@@ -1311,7 +1317,6 @@ def ey_2d_eff(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10, max_s
 
     return x_vals, x_field_vals, y_vals, y_field_vals, beta
 
-
 def ey_2d_eff_alt(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10, max_solver_iter=default_iter, divisions=plot_divisions):
     """Evaluates the ey values along both the x and y axes and plots them
 
@@ -1351,6 +1356,7 @@ def ey_2d_eff_alt(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10, m
     • If no Beta can be evaluated for this mode, it returns None
     • Assumes a strip waveguide
     • Uses the alternate effective index method
+    • List of x_vals, y_vals returned are in terms of w, h
 
     """
     c_light = 3e8
@@ -1417,8 +1423,6 @@ def ey_2d_eff_alt(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10, m
     a = (n4**2 - n2**2) / (N_prev**2 - n4**2)
     b = (N**2 - n4**2) / (N_prev**2 - n4**2)
     d = (n2 / N_prev)**2
-    # d = 1
-    # print(V, a, b, d)
 
     i = 0
     x_field_vals = []
@@ -1452,7 +1456,6 @@ def ey_2d_eff_alt(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10, m
         i += 1
 
     return x_vals, x_field_vals, y_vals, y_field_vals, beta
-
 
 def ey_2d_marcatili(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10, max_solver_iter=default_iter, divisions=plot_divisions, ignore_beta=False):
     """Evaluates the ey values along both the x and y axes and plots them
@@ -1493,6 +1496,7 @@ def ey_2d_marcatili(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10,
     • If no Beta can be evaluated for this mode, it returns None
     • Assumes a strip waveguide
     • Uses the marcatili method
+    • List of x_vals, y_vals returned are in terms of w, h
 
     """
     c_light = 3e8
@@ -1571,17 +1575,86 @@ def ey_2d_marcatili(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10,
 
     return x_vals, x_field_vals, y_vals, y_field_vals, beta
 
-def plot_2d():
+def plot_2d(ey=ey_2d_marcatili, lamb=wavelength, mode=0, mode_2=0, margin_x=2, margin_y=2, max_solver_iter=default_iter, divisions=plot_divisions, normalize=False, target_file=None):
     """Plots the mode profile looking at a cross-section of the waveguide
 
     PARAMETERS
     ----------
+    ey : func
+        chosen function to evaluate ey values
+    lamb : number
+        wavelength (lambda)
+    mode : int
+        mode number for propagation in x direction
+    mode_2 : int
+        mode number for propagation in y direction
+    margin_x : number
+        x_vals will be within the range     margin_value * w ± w
+    margin_y : number
+        y_vals will be within the range     margin_value * h ± h
+    max_solver_iter : number
+        max number of iterations to run the solver
+    divisions : number
+        number of points to evaluate
+    normalize : bool
+        whether or not to normalize the power to 1W
+    target_file : string
+        target file to save plot to
+        if no target file is provided, it does not save the plot to a file and simply returns points to plot
 
     RETURNS
     -------
-    """
-    pass
+    (computed values from ey)
+    x_vals : list of numbers
+        list of x values
+    x_field_vals : list of numbers
+        list of e_y(x) computations
+    y_vals : list of numbers
+        list of y values
+    y_field_vals : list of numbers
+        list of e_y(y) computations
+    beta : number
+        the Beta value of the waveguide for a given mode
 
+    NOTES
+    -----
+    • If no Beta can be evaluated for this mode, it returns None
+    • Assumes a strip waveguide
+    • Uses the marcatili method
+    • List of x_vals, y_vals returned are in terms of w, h
+
+    """
+    res = ey(lamb=lamb, mode=mode, mode_2=mode_2, margin_x=margin_x, margin_y=margin_y, max_solver_iter=max_solver_iter, divisions=divisions)
+    if res == None:
+        return
+    if normalize:
+        a_x = curve_area(res[0], [i**2 for i in res[1]], total_area=True)
+        res1 = [i / a_x for i in res[1]]
+        a_y = curve_area(res[2], [i**2 for i in res[3]], total_area=True)
+        res3 = [i / a_y for i in res[3]]
+    else:
+        res1 = res[1]
+        res3 = res[3]
+
+    x = np.array([res1])
+    y = np.array([res3])
+    r = np.dot(abs(y.T), abs(x))
+
+    plt.imshow(r).set_extent([res[0][0], res[0][divisions - 1], res[2][0], res[2][divisions - 1]])
+    plt.colorbar()
+    plt.xticks([-1, 0])
+    plt.yticks([-1, 0])
+    plt.axvline(-1, color="white", linestyle="--")
+    plt.axvline(0, color="white", linestyle="--")
+    plt.axhline(-1, color="white", linestyle="--")
+    plt.axhline(0, color="white", linestyle="--")
+    plt.xlabel("x")
+    plt.ylabel("y")
+
+    if target_file != None and type(target_file) == str:
+        savefig(target_file)
+
+    return res
 
 def em_default(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_iter, divisions=divisions):
     """Generates values to plot the TM mode along the x-axis given as h_y(x)
@@ -1616,6 +1689,7 @@ def em_default(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_iter
         - substrate (left)
         - film (middle)
         - cover (right)
+    • List of x_vals returned are in terms of w
 
     """
     start_margin=-margin
@@ -1632,7 +1706,7 @@ def em_default(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_iter
     b = (N**2 - ns**2) / (nf**2 - ns**2)
     d = (nc / nf)**2
 
-    # -h / 2 center
+    # -w / 2 center
     start = start_margin - 0.5
     end = end_margin - 0.5
     x_vals = make_range(start, end, divisions)
@@ -1670,8 +1744,13 @@ def em_default(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_iter
         
     return x_vals, field_vals, beta
 
-def plot_em_default():
+def plot_em_default(target_file=None):
     """Plots the TM mode
+    PARAMETERS
+    ----------
+    target_file : string
+        target file to save plot to
+        if no target file is provided, it does not save the plot to a file and simply returns points to plot
 
     RETURNS
     -------
@@ -1697,45 +1776,9 @@ def plot_em_default():
     if res == None:
         return 
     plt.plot(res[0], res[1])
+    if target_file != None and type(target_file) == str:
+        savefig(target_file)
     return res
-
-def curve_area(x_vals, y_vals, start=-inf, end=inf, total_area=True):
-    """computes the area under some curve y = f(x)
-
-    PARAMETERS
-    ----------
-    x_vals : list of numbers
-        list of x values
-    y_vals : list of numbers
-        list of y values
-    start : number
-        where to start evaluating area
-    end : number
-        where to stop evaluating area
-    total_area : bool
-        whether or not to calculate the total area under the curve (take absolute value of points)
-
-    RETURNS
-    -------
-    area : number
-        evaluated area contained by the curve
-
-    """
-    x_start = x_vals[0]
-    x_end = x_vals[len(x_vals) - 1]
-    delta = (x_end - x_start) / len(x_vals)
-    new_y = []
-    if total_area == False:
-        func = lambda x:x
-    else:
-        func = abs
-    new_y = 0
-    for i in range(len(x_vals)):
-        x = x_vals[i]
-        y = y_vals[i]
-        if x >= start and x <= end:
-            new_y += func(y)
-    return new_y * delta
 
 """
 ------------------------------------------------------------------------------------------------------------
@@ -1791,7 +1834,6 @@ def absorption_loss(N=1e18, lamb=wavelength, doping="n", print_afc=False, consta
     if print_afc:
         print(afc)
     return afc * N
-
 
 def absorption_default(N=1e18, lamb=wavelength, doping="n", print_afc=False):
     """Caluclates the Absorption Loss assuming the film has a refractive index of 3.5
@@ -2886,6 +2928,44 @@ def remove_none(lst1, lst2):
             toReturn1 += [lst1[i]]
             toReturn2 += [lst2[i]]
     return toReturn1, toReturn2
+
+def curve_area(x_vals, y_vals, start=-inf, end=inf, total_area=True):
+    """computes the area under some curve y = f(x)
+
+    PARAMETERS
+    ----------
+    x_vals : list of numbers
+        list of x values
+    y_vals : list of numbers
+        list of y values
+    start : number
+        where to start evaluating area
+    end : number
+        where to stop evaluating area
+    total_area : bool
+        whether or not to calculate the total area under the curve (take absolute value of points)
+
+    RETURNS
+    -------
+    area : number
+        evaluated area contained by the curve
+
+    """
+    x_start = x_vals[0]
+    x_end = x_vals[len(x_vals) - 1]
+    delta = (x_end - x_start) / len(x_vals)
+    new_y = []
+    if total_area == False:
+        func = lambda x:x
+    else:
+        func = abs
+    new_y = 0
+    for i in range(len(x_vals)):
+        x = x_vals[i]
+        y = y_vals[i]
+        if x >= start and x <= end:
+            new_y += func(y)
+    return new_y * delta
 
 def integrate(x_vals, start=-inf, end=inf, func=lambda x:x):
     """computes the approximated integral of a curve
