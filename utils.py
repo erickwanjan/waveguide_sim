@@ -1,3 +1,10 @@
+"""
+TODO
+    plotting...heatmap  plot_2d...
+    some savefig capability
+    Add sample code to run functions
+"""
+
 from numpy import *
 import numpy as np
 from matplotlib.pyplot import *
@@ -1564,6 +1571,18 @@ def ey_2d_marcatili(lamb=wavelength, mode=0, mode_2=0, margin_x=10, margin_y=10,
 
     return x_vals, x_field_vals, y_vals, y_field_vals, beta
 
+def plot_2d():
+    """Plots the mode profile looking at a cross-section of the waveguide
+
+    PARAMETERS
+    ----------
+
+    RETURNS
+    -------
+    """
+    pass
+
+
 def em_default(lamb=wavelength, mode=0, margin=1.5, max_solver_iter=default_iter, divisions=divisions):
     """Generates values to plot the TM mode along the x-axis given as h_y(x)
 
@@ -2993,6 +3012,17 @@ def cutoff_nf(mode=0):
 
     """
     return sqrt((cutoff_V(mode=mode) / (k * w))**2 + ns**2)
+
+def save_to_file(target_file):
+    """Saves the plotted image to a file for display
+
+    PARAMETERS
+    ----------
+    target_file : string
+        target file name to save the image
+
+    """
+    savefig(target_file)
 
 """
 ------------------------------------------------------------------------------------------------------------
