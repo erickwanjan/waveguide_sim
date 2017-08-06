@@ -1,6 +1,13 @@
 """
 TODO
     Add sample code to run functions (savefig)
+    
+    waveguide class...
+    file for solvers
+    file for fields/confinement
+    file for angles, film thicknesses
+    file for loss
+    utils file
 """
 
 from numpy import *
