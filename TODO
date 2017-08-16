@@ -1,0 +1,18 @@
+FINISHED
+	new_utils
+	bV
+	solvers (I THINK)
+	fields (I THINK)
+
+TODO:
+	waveguide (add other recover waveguide nf...things, add doping stuff too)
+	loss (reorder too)
+	parameters (rename file name to something more fitting maybe)
+	simulator (comments)
+
+	FIX IMPORT STATEMENTS? (reduce redundency)
+
+RESTRUCTURING...Have some methods repeated twice
+None checks...
+
+change mode label
