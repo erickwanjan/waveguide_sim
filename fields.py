@@ -1,8 +1,5 @@
-from waveguide import *
-import waveguide
 from solvers import *
 import solvers
-from utils import *
 
 def ey_1d_x(lamb=None, mode=0, margin=1.5, max_solver_iter=None, divisions=None, correct_2d=False):
     """Generates values to plot the ey curve along the x-axis given as e_y(x)
@@ -155,7 +152,7 @@ def ey_1d_y(lamb=None, mode=0, margin=1.5, max_solver_iter=None, divisions=None,
         - substrate (bottom)
         - film (middle)
         - cover (top)
-    • List of y_vals returned are in terms of h
+    • List of y_vals returned are in terms of the height
 
     """
     if max_solver_iter == None:
@@ -364,7 +361,7 @@ def plot_ey_1d_y(lamb=None, mode=0, margin=1.5, peak_normalize=False, true_norma
     -------
     (computed values from ey)
     y_vals : list of numbers
-        list of x values
+        list of y values
     field_vals : list of numbers
         list of e_y(y) computations
     beta : number
@@ -435,9 +432,9 @@ def ey_2d_eff(lamb=None, mode=0, mode_2=0, margin_x=10, margin_y=10, max_solver_
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     margin_x : number
         x_vals will be within the range     margin_value * w ± w
     margin_y : number
@@ -466,7 +463,7 @@ def ey_2d_eff(lamb=None, mode=0, mode_2=0, margin_x=10, margin_y=10, max_solver_
     • If no Beta can be evaluated for this mode, it returns None
     • Assumes a strip waveguide
     • Uses the effective index method
-    • List of x_vals, y_vals returned are in terms of w, h
+    • List of x_vals and y_vals returned are in terms of w and h, respectively
 
     """
     if max_solver_iter == None:
@@ -584,9 +581,9 @@ def ey_2d_eff_alt(lamb=None, mode=0, mode_2=0, margin_x=10, margin_y=10, max_sol
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     margin_x : number
         x_vals will be within the range     margin_value * w ± w
     margin_y : number
@@ -648,7 +645,6 @@ def ey_2d_eff_alt(lamb=None, mode=0, mode_2=0, margin_x=10, margin_y=10, max_sol
     V = k * h * sqrt(n1**2 - n5**2)
     a = (n5**2 - n3**2) / (n1**2 - n5**2)
     b = (N_prev**2 - n5**2) / (n1**2 - n5**2)
-    # print(V, a, b)
 
     i = 0
     y_field_vals = []
@@ -734,9 +730,9 @@ def ey_2d_marcatili(lamb=None, mode=0, mode_2=0, margin_x=10, margin_y=10, max_s
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     margin_x : number
         x_vals will be within the range     margin_value * w ± w
     margin_y : number
@@ -857,6 +853,48 @@ def ey_2d_marcatili(lamb=None, mode=0, mode_2=0, margin_x=10, margin_y=10, max_s
     return x_vals, x_field_vals, y_vals, y_field_vals, beta
 
 def ey_2d_marcatili_ignore_beta(lamb=None, mode=0, mode_2=0, margin_x=10, margin_y=10, max_solver_iter=None, divisions=None):
+    """Evaluates the ey values along both the x and y axes and plots them (always ignoring beta)
+
+    PARAMETERS
+    ----------
+    lamb : number
+        wavelength (lambda)
+    mode : int
+        mode number for transverse propagation in x direction
+    mode_2 : int
+        mode number for transverse propagation in y direction
+    margin_x : number
+        x_vals will be within the range     margin_value * w ± w
+    margin_y : number
+        y_vals will be within the range     margin_value * h ± h
+    max_solver_iter : number
+        max number of iterations to run the solver
+    divisions : number
+        number of points to evaluate
+
+    RETURNS
+    -------
+    (computed values from ey)
+    x_vals : list of numbers
+        list of x values
+    x_field_vals : list of numbers
+        list of e_y(x) computations
+    y_vals : list of numbers
+        list of y values
+    y_field_vals : list of numbers
+        list of e_y(y) computations
+    beta : number
+        the Beta value of the waveguide for a given mode
+
+    NOTES
+    -----
+    • If no Beta can be evaluated for this mode, it returns None
+    • Assumes a strip waveguide
+    • Uses the marcatili method
+    • List of x_vals, y_vals returned are in terms of w, h
+    • ey_2d_marcatili function such that the fact that beta may be less than 0 is always ignored
+
+    """
     return ey_2d_marcatili(lamb=lamb, mode=mode, mode_2=mode_2, margin_x=margin_x, margin_y=margin_y, max_solver_iter=max_solver_iter, divisions=divisions, ignore_beta=True)
 
 def plot_ey_2d(ey=ey_2d_marcatili, lamb=None, mode=0, mode_2=0, margin_x=2, margin_y=2, max_solver_iter=None, divisions=None, normalize=False, target_file=None, no_output=False):
@@ -869,9 +907,9 @@ def plot_ey_2d(ey=ey_2d_marcatili, lamb=None, mode=0, mode_2=0, margin_x=2, marg
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     margin_x : number
         x_vals will be within the range     margin_value * w ± w
     margin_y : number
@@ -1053,6 +1091,7 @@ def em_default(lamb=None, mode=0, margin=1.5, max_solver_iter=None, divisions=No
 
 def plot_em(lamb=None, mode=0, margin=1.5, max_solver_iter=None, divisions=None, target_file=None, no_output=False):
     """Plots the TM mode
+    
     PARAMETERS
     ----------
     lamb : number
@@ -1099,4 +1138,3 @@ def plot_em(lamb=None, mode=0, margin=1.5, max_solver_iter=None, divisions=None,
     if no_output:
         return
     return res
-

@@ -1,4 +1,3 @@
-# LATER RENAME TO UTILS
 from numpy import *
 import numpy as np
 from matplotlib.pyplot import *
@@ -11,6 +10,7 @@ from math import *
 UTILITY FUNCTIONS
 ------------------------------------------------------------------------------------------------------------
 """
+
 # MATH FUNCTIONS
 rad = lambda x: x * pi / 180
 scalar = lambda x: x * 180 / pi

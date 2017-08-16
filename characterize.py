@@ -148,17 +148,13 @@ EFFECTIVE FILM THICKNESS
 ------------------------------------------------------------------------------------------------------------
 """
 
-def effective_film_thickness_1d_x(lamb=None, solver=solve_1d_x):
+def effective_film_thickness_1d_x(lamb=None):
     """Computes the effective thickness of the waveguide (width of the film)
 
     PARAMETERS
     ----------
-    beta : number
-        
     lamb : number
         wavelength (lambda)
-    solver : func
-        solver of choice to calculate beta
 
     RETURNS
     -------
@@ -173,7 +169,8 @@ def effective_film_thickness_1d_x(lamb=None, solver=solve_1d_x):
     """
     if lamb == None:
         lamb = waveguide.wavelength
-    beta = solver(mode=mode, lamb=lamb)
+    w = waveguide.wavelength
+    beta = solver_1d_x(mode=0, lamb=lamb)
     if beta == None:
         return
     return w + 2 / ys_lamb(beta, lamb)
@@ -181,15 +178,12 @@ def effective_film_thickness_1d_x(lamb=None, solver=solve_1d_x):
 def effective_film_thickness_2d_x(kx, lamb=None):
     """Computes the effective width of the waveguide film
 
-
     PARAMETERS
     ----------
     kx : number
-        
+        kappa_x value describing transverse propagation in the x direction
     lamb : number
         wavelength (lambda)
-    solver : func
-        solver of choice to calculate beta
 
     RETURNS
     -------
@@ -199,6 +193,7 @@ def effective_film_thickness_2d_x(kx, lamb=None):
     NOTES
     -----
     • Assumes a strip waveguide
+    • If no propagation is supported, it returns the film width
 
     """
     if lamb == None:
@@ -213,12 +208,10 @@ def effective_film_thickness_2d_y(ky, lamb=None):
 
     PARAMETERS
     ----------
-    beta : number
-        
+    ky : number
+       kappa_y value describing transverse propagation in the y direction 
     lamb : number
         wavelength (lambda)
-    solver : func
-        solver of choice to calculate beta
 
     RETURNS
     -------
@@ -228,6 +221,7 @@ def effective_film_thickness_2d_y(ky, lamb=None):
     NOTES
     -----
     • Assumes a strip waveguide
+    • If no propagation is supported, it returns the film height
 
     """
     if lamb == None:
@@ -245,9 +239,9 @@ def effective_film_thickness_2d(lamb=None, mode=0, mode_2=0):
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
 
     RETURNS
     -------
@@ -292,15 +286,13 @@ CONFINEMENT FACTOR
 ------------------------------------------------------------------------------------------------------------
 """
 
-def confinement_factor_single_mode(lamb=None, solver=solve_1d_x):
+def confinement_factor_single_mode(lamb=None):
     """Computes the confinement factor looking only at the zero-th mode (m = 0)
 
     PARAMETERS
     ----------
     lamb : number
         wavelength (lambda)
-    solver : func
-        method to solve for beta
 
     RETURNS
     -------
@@ -314,7 +306,9 @@ def confinement_factor_single_mode(lamb=None, solver=solve_1d_x):
     """
     if lamb == None:
         lamb = waveguide.wavelength
-    beta = solver(lamb=lamb)
+    beta = solve_1d_x(lamb=lamb)
+    if beta == None:
+        return
     yc_val = yc_lamb(beta, lamb)
     ys_val = ys_lamb(beta, lamb)
     kf_val = kf_lamb(beta, lamb)
@@ -430,13 +424,13 @@ def confinement_factor_y(lamb=None, mode=0, margin=20, print_statements=False):
         print("film_power", film, "total_power", total)
     return film / total
 
-def confinement_factor_interface(roughness=11.5e-9, lamb=None, mode=0, margin=20, print_statements=False):
+def confinement_factor_interface(roughness=None, lamb=None, mode=0, margin=20, print_statements=False):
     """Computes the confinement factor in the cladding looking at a single mode
 
     PARAMETERS
     ----------
     roughness : number
-        roughness variance denoting the range surrounding the cladding to consider
+        roughness variance denoting the range surrounding the cladding to consider (given in meters)
     lamb : number
         wavelength (lambda)
     mode : int
@@ -458,6 +452,8 @@ def confinement_factor_interface(roughness=11.5e-9, lamb=None, mode=0, margin=20
     """
     if lamb == None:
         lamb = waveguide.wavelength
+    if roughness == None:
+        roughness = waveguide.roughness
     w = waveguide.w
     freq = c_light / lamb
     omega = freq * 2 * pi
@@ -473,19 +469,19 @@ def confinement_factor_interface(roughness=11.5e-9, lamb=None, mode=0, margin=20
         print("interface_power", clad, "total_power", total)
     return 2 * clad / total
 
-def confinement_factor_interface_2d(roughness=11.5e-9, lamb=None, mode=0, mode_2=0, margin=20, divisions=None, correct_2d=True):
+def confinement_factor_interface_2d(roughness=None, lamb=None, mode=0, mode_2=0, margin=20, divisions=None, correct_2d=True):
     """Computes the confinement factor at the waveguide boundary interface looking at a single mode
 
     PARAMETERS
     ----------
     roughness : number
-        roughness variance denoting the range surrounding the cladding to consider
+        roughness variance denoting the range surrounding the cladding to consider (given in meters)
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     margin : number
         x_vals will be within the range     margin_value * w ± w
     divisions : number
@@ -505,13 +501,15 @@ def confinement_factor_interface_2d(roughness=11.5e-9, lamb=None, mode=0, mode_2
     """
     if lamb == None:
         lamb = waveguide.wavelength
+    if roughness == None:
+         roughness = waveguide.roughness
     w, h = waveguide.w, waveguide.h
     if divisions == None:
         divisions = solvers.plot_divisions
-
     divisions = (divisions) * 1 * margin
     freq = c_light / lamb
     omega = freq * 2 * pi
+
     if mode_2 != 0:
         mod_correct = False
     else:
@@ -537,7 +535,7 @@ def confinement_factor_interface_2d(roughness=11.5e-9, lamb=None, mode=0, mode_2
         x_start += 1
     x_end = x_start
     while x_vals[x_end] <= 0:
-        x_end += 1
+        x_end += 1 
     x_end -= 1
     y_start = 0
     while y_vals[y_start] < -1:
@@ -658,11 +656,9 @@ def confinement_factor_2d(lamb=None, mode=0, mode_2=0, print_statements=False):
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
-    divisions : number
-        number of points to evaluate
+        mode number for transverse propagation in y direction
     print_statements : bool
         whether or not to print at certain steps of calculation
 
@@ -683,7 +679,6 @@ def confinement_factor_2d(lamb=None, mode=0, mode_2=0, print_statements=False):
     if res == None:
         return None
     beta, kx, ky = res
-
     film_x = func_2d(0, kx) - func_2d(-w, kx)
     film_y = func_2d(0, ky) - func_2d(-h, ky)
     total_x = film_x + 1 / ys_lamb_2d_x(kx, lamb)
@@ -808,15 +803,15 @@ def fundamental_mode_weight(lamb=None, n_ref=2.4822368944160025, margin=20):
     NOTES
     -----
     • If beta cannot be evaluated, it returns None
+    • The reference is set for the default waveguide parameters with a duty cycle of 0.4
+    • Re-determine reference single-mode field distribution to fit (gaussian) if nf = 2.48 supports multi-mode behavior
 
     """
     if lamb == None:
         lamb = waveguide.wavelength
-
     original_n = waveguide.nf
 
-    res = ey_1d_x(lamb=lamb, margin=margin, mode=0)
-    # res = ey_1d_x(lamb=lamb, margin=margin, mode=0, correct_2d=True)
+    res = ey_1d_x(lamb=lamb, margin=margin, mode=0, correct_2d=True)
     if res == None:
         return
     temp = res[1]
@@ -826,8 +821,7 @@ def fundamental_mode_weight(lamb=None, n_ref=2.4822368944160025, margin=20):
     m2 = max(temp)
 
     waveguide.nf=waveguide.n1 = n_ref
-    res = ey_1d_x(lamb=lamb, margin=margin, mode=0)
-    # res = ey_1d_x(lamb=lamb, margin=margin, mode=0, correct_2d=True)
+    res = ey_1d_x(lamb=lamb, margin=margin, mode=0, correct_2d=True)
     if res == None:
         return
     temp = res[1]

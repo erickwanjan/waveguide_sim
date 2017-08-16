@@ -1,6 +1,5 @@
 from waveguide import *
 import waveguide
-from utils import *
 
 # CONSTANT SOLVER PARAMETERS
 default_iter=10
@@ -144,7 +143,6 @@ def solve_1d_y(lamb=None, mode=0, print_N=print_N, max_iter=default_iter):
         print(beta / k_lamb(lamb))
     return beta
 
-
 # (SOLVING FOR TM MODE)
 f1_mag = f1_lamb
 
@@ -173,7 +171,7 @@ def solve_tm(lamb=None, mode=0, print_N=print_N, max_iter=default_iter):
     NOTES
     -----
     • If no solution is found (Beta cannot be solved for some mode), it returns None
-    • Calculates as a slab waveugide along the x axis (uniform along the x axis)
+    • Calculates as a slab waveugide along the x axis (uniform along the y axis)
 
     """
     if lamb == None:
@@ -200,6 +198,7 @@ def solve_tm(lamb=None, mode=0, print_N=print_N, max_iter=default_iter):
     if print_N:
         print(beta / k_lamb(lamb))
     return beta
+
 
 # (EFFECTIVE INDEX METHOD)
 def f1_eff(neff, lamb):
@@ -236,9 +235,9 @@ def solve_eff(lamb=None, mode=0, mode_2=0, ret_N=False, ret_trans=False, print_n
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     ret_N : bool
         whether or not to return the calculated N value
     ret_trans : bool
@@ -332,9 +331,9 @@ def solve_eff_alt(lamb=None, mode=0, mode_2=0, ret_N=False, ret_trans=False, pri
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     ret_N : bool
         whether or not to return the calculated N value
     ret_trans : bool
@@ -422,7 +421,6 @@ def solve_eff_alt(lamb=None, mode=0, mode_2=0, ret_N=False, ret_trans=False, pri
 
 
 # (MARCATILI METHOD)
-
 def f5(kx):
     return waveguide.w * kx
 
@@ -445,9 +443,9 @@ def solve_marcatili(lamb=None, mode=0, mode_2=0, ret_N=False, ret_trans=False, p
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     ret_N : bool
         whether or not to return the calculated N value
     ret_trans : bool
@@ -550,9 +548,9 @@ def solve_2d(lamb=None, mode=0, mode_2=0, ret_trans=False, max_iter=default_iter
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     ret_trans : bool
         whether or not to return calculated components kx, ky such that k*nf=√kx^2 + ky^2 + Beta^2
     max_iter : number

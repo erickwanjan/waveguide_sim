@@ -1,15 +1,3 @@
-"""
-TODO
-    Add sample code to run functions (savefig)
-    
-    waveguide class...
-    file for solvers
-    file for fields/confinement
-    file for angles, film thicknesses
-    file for loss
-    utils file
-    lamb=wavelength thing...
-"""
 from utils import *
 
 """
@@ -163,6 +151,7 @@ def recover_duty_cycle(n):
         return recover_duty_cycle_2(n)
     elif method == 3:
         return recover_duty_cycle_3(n)
+
 
 duty_cycle = 0.4
 method = 2

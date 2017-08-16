@@ -1,9 +1,5 @@
-import waveguide
-from waveguide import *
-import parameters
-from parameters import *
-import solvers
-from solvers import *
+from characterize import *
+import characterize
 
 
 """
@@ -14,6 +10,7 @@ LOSS FUNCTIONS
 
 def absorption_loss(print_afc=False, constant_absorption=False):
     """Calculates the loss due to free carrier absorption
+
     PARAMETERS
     ----------
     print_afc : bool
@@ -97,7 +94,6 @@ def roughness_loss_uniform_slab(lamb=None, mode=0, print_statements=False):
 def roughness_loss_1d_x(lamb=None, mode=0, return_components=False):
     """Calculates the loss due to surface roughness assuming a slab SWG waveguide uniform in the x direction
 
-    
     PARAMETERS
     ----------
     lamb : number
@@ -121,14 +117,14 @@ def roughness_loss_1d_x(lamb=None, mode=0, return_components=False):
     roughness = waveguide.roughness
     duty_cycle = waveguide.duty_cycle
     exp = waveguide.adjustment_exp
-
     if lamb == None:
         lamb = waveguide.wavelength
-
     utils.w = utils.default_w
     utils.fixed_w = utils.default_w
 
     calc_w = effective_film_thickness_1d(lamb=lamb, mode=mode)
+    if calc_w == None:
+        return None
     add_w = (1 - duty_cycle)**exp * (calc_w - waveguide.w)
     waveguide.w = waveguide.w + add_w
     waveguide.fixed_w, waveguide.fixed_h = calc_w, calc_h
@@ -142,7 +138,6 @@ def roughness_loss_1d_x(lamb=None, mode=0, return_components=False):
     return r_loss
 
 def roughness_loss_uniform_strip(lamb=None, mode=0, mode_2=0, fixed_thickness=False, print_statements=False, return_components=False):
-    # CHANGE METHOD TO RETURN COMPONENTS
     """Calculates the loss due to surface roughness assuming a 2D waveguide for a specific propagation mode
 
     Parameters
@@ -150,9 +145,9 @@ def roughness_loss_uniform_strip(lamb=None, mode=0, mode_2=0, fixed_thickness=Fa
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
     fixed_thickness : bool
         whether or not to assume the penetration depth is 0
     print_statements : bool
@@ -230,9 +225,9 @@ def roughness_loss_2d(lamb=None):
     lamb : number
         wavelength (lambda)
     mode : int
-        mode number for propagation in x direction
+        mode number for transverse propagation in x direction
     mode_2 : int
-        mode number for propagation in y direction
+        mode number for transverse propagation in y direction
 
     Returns
     -------
@@ -255,12 +250,18 @@ def roughness_loss_2d(lamb=None):
     utils.w, utils.h = utils.default_w, utils.default_h
     utils.fixed_w, utils.fixed_h = utils.default_w, utils.default_h
 
-    calc_w, calc_h = effective_film_thickness_2d(lamb=lamb, mode=0, mode_2=0)
+    res = effective_film_thickness_2d(lamb=lamb, mode=0, mode_2=0)
+    if res == None:
+        return
+    calc_w, calc_h = res
     add_w, add_h = (1 - duty_cycle)**exp * (calc_w - waveguide.w), (1 - duty_cycle)**exp * (calc_h - waveguide.h)
     waveguide.w, waveguide.h = waveguide.w + add_w, waveguide.h + add_h
     waveguide.fixed_w, waveguide.fixed_h = calc_w, calc_h
 
-    r_loss_x, r_loss_y = roughness_loss_uniform_strip(lamb=lamb, mode=0, mode_2=0, fixed_thickness=True, return_components=True)
+    res = roughness_loss_uniform_strip(lamb=lamb, mode=0, mode_2=0, fixed_thickness=True, return_components=True)
+    if res == None:
+        return
+    r_loss_x, r_loss_y = res
     r_loss = sqrt((r_loss_x / fundamental_mode_weight(n))**2 + r_loss_y**2)
 
     # restore values
@@ -270,19 +271,16 @@ def roughness_loss_2d(lamb=None):
     return r_loss
 
 def transmission_loss(lamb=1550e-9, return_components=False, constant_absorption=False):
-    """Calculates the expected loss of a swg waveguide
+    """Calculates the expected loss of a single-mode swg strip waveguide
     
     PARAMETERS
     ----------
     lamb : number
         wavelength (lambda)
-    mode : int
-        mode number for propagation in x direction
-    mode_2 : int
-        mode number for propagation in y direction
     return_components : bool
         whether or not to return the individual components of loss
     constant_absorption : bool
+        whether or not loss is kept invariant with the effective index
 
     RETURNS
     -------
@@ -299,7 +297,6 @@ def transmission_loss(lamb=1550e-9, return_components=False, constant_absorption
     roughness = waveguide.roughness
     duty_cycle = waveguide.duty_cycle
     exp = waveguide.adjustment_exp
-
     if lamb == None:
         lamb = waveguide.wavelength
 
@@ -311,11 +308,14 @@ def transmission_loss(lamb=1550e-9, return_components=False, constant_absorption
     waveguide.w, waveguide.h = waveguide.w + add_w, waveguide.h + add_h
     waveguide.fixed_w, waveguide.fixed_h = calc_w, calc_h
 
-    r_loss_x, r_loss_y = roughness_loss_uniform_strip(lamb=lamb, mode=0, mode_2=0, fixed_thickness=True, return_components=True)
+    res = roughness_loss_uniform_strip(lamb=lamb, mode=0, mode_2=0, fixed_thickness=True, return_components=True)
+    if res == None:
+        return
+    r_loss_x, r_loss_y = res
     a_loss = absorption_loss(constant_absorption=constant_absorption)
     c_factor = confinement_factor_2d(lamb=lamb)
     r_loss = sqrt((r_loss_x / fundamental_mode_weight(lamb=lamb))**2 + r_loss_y**2)
-    print(waveguide.fixed_w, waveguide.fixed_h, waveguide.w, waveguide.h)
+
     # restore values
     waveguide.w, waveguide.h = waveguide.default_w, waveguide.default_h
     waveguide.fixed_w, waveguide.fixed_h = waveguide.default_w, waveguide.default_h
